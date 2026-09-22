@@ -8,11 +8,12 @@ from aap_gateway_api.preferences import gateway_preference_registry
 # These are excluded from label validation since they are not real settings.
 _TEST_SECTIONS = frozenset({'testing', 'general', 'generic'})
 
-# Pattern matching fully-uppercase tokens (acronyms like URL, JWT, CSRF, etc.)
-_ACRONYM_RE = re.compile(r'^[A-Z][A-Z0-9]+$')
+# Acronyms used in registered preference labels. Keep this explicit so an
+# accidentally all-caps ordinary word does not bypass title-case validation.
+_KNOWN_ACRONYMS = frozenset({'CSRF', 'JWT', 'OIDC', 'OAuth2', 'RSS', 'TTL', 'URL'})
 
-# Pattern matching tokens inside parentheses, e.g. "(seconds)"
-_PAREN_RE = re.compile(r'^\(.*\)$')
+# Stray punctuation at the end of prose usually indicates a copy/paste error.
+_TRAILING_STRAY_PUNCTUATION_RE = re.compile(r"[/'\"]$")
 
 
 def _is_title_case(label: str) -> bool:
@@ -20,8 +21,7 @@ def _is_title_case(label: str) -> bool:
 
     Rules:
     * Every word must start with an uppercase letter (Title Case).
-    * Acronyms (e.g. URL, JWT, CSRF, OIDC) stay fully uppercase.
-    * Parenthesized tokens like ``(seconds)`` are allowed lowercase.
+    * Known acronyms (e.g. URL, JWT, CSRF, OIDC) stay fully uppercase.
     * Minor words (articles, prepositions, conjunctions) may be lowercase
       or capitalized -- both are accepted. The key requirement is that
       non-minor words must always be capitalized.
@@ -37,12 +37,8 @@ def _is_title_case(label: str) -> bool:
         is_first = idx == 0
         is_last = idx == len(words) - 1
 
-        # Skip parenthesized tokens
-        if _PAREN_RE.match(word):
-            continue
-
-        # Acronyms must stay fully uppercase
-        if _ACRONYM_RE.match(word):
+        # Known acronyms must stay fully uppercase
+        if word in _KNOWN_ACRONYMS:
             continue
 
         lower = word.lower()
@@ -96,15 +92,17 @@ class TestPreferenceLabels:
             + "\n\nTitle Case rules: capitalize all words except articles (a, an, the), "
             "coordinating conjunctions (and, or, but), and short prepositions "
             "(in, of, for, to, at, by) -- unless first or last word. "
-            "Non-minor words must always start with an uppercase letter."
+            "Non-minor words must always start with an uppercase letter. If a "
+            "minor word appears first or last, check that the label is not an "
+            "incomplete phrase."
         )
 
-    def test_help_texts_have_no_trailing_stray_apostrophes(self):
-        """No help_text should end with a stray apostrophe before the closing quote."""
+    def test_help_texts_have_no_trailing_stray_punctuation(self):
+        """No help_text should end with punctuation likely left by a copy/paste error."""
         bad = []
         for pref in _get_registered_preferences():
             help_text = getattr(pref, 'help_text', None)
-            if help_text and str(help_text).endswith(".'"):
+            if help_text and _TRAILING_STRAY_PUNCTUATION_RE.search(str(help_text)):
                 bad.append(f"{pref.section.name}.{pref.name}: {help_text!r}")
 
-        assert not bad, "The following preferences have help_text with a trailing stray apostrophe:\n" + "\n".join(f"  - {b}" for b in bad)
+        assert not bad, "The following preferences have help_text with trailing stray punctuation:\n" + "\n".join(f"  - {b}" for b in bad)

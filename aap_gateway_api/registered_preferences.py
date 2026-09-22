@@ -418,7 +418,7 @@ register(
     default="",
     required=False,
     preference_type="string",
-    help_text=_("This username is used to send data to Automation Analytics/"),
+    help_text=_("This username is used to send data to Automation Analytics."),
     encrypted=False,
     label=_('Red Hat Hybrid Cloud Console Username'),
 )
@@ -526,5 +526,5 @@ if getattr(settings, 'FEATURE_OIDC_WORKLOAD_IDENTITY_ENABLED', False):
             "Adjust based on organizational workload patterns; no hard maximum."
         ),
         encrypted=False,
-        label=_('OIDC JWT Fallback TTL (seconds)'),
+        label=_('OIDC JWT Fallback TTL in Seconds'),
     )
