@@ -23,7 +23,7 @@ register(
     preference_type="int",
     help_text=_("How long the access tokens are valid for."),
     encrypted=False,
-    label=_('Gateway Access Token Expiration'),
+    label=_('Gateway Access Token Expiration in Seconds'),
 )
 
 register(
@@ -129,7 +129,7 @@ register(
     help_text=_("The timeout (in seconds) before the resource client will drop requests after forming connections."),
     encrypted=False,
     min_value=0.0,
-    label=_('Resource Client Request Timeout'),
+    label=_('Resource Client Request Timeout in Seconds'),
 )
 
 register(
@@ -140,7 +140,7 @@ register(
     preference_type="int",
     help_text=_("The timeout (in seconds) before the proxy will report a timeout and generate a 504."),
     encrypted=False,
-    label=_('Request Timeout'),
+    label=_('Request Timeout in Seconds'),
 )
 
 register(
@@ -155,7 +155,7 @@ register(
         "Individual routes may extend this value but cannot reduce it."
     ),
     encrypted=False,
-    label=_('Idle Timeout'),
+    label=_('Idle Timeout in Seconds'),
 )
 
 register(
@@ -168,7 +168,7 @@ register(
     encrypted=False,
     min_value=100,
     max_value=10000,
-    label=_('Trusted Header Timeout'),
+    label=_('Trusted Header Timeout in Milliseconds'),
 )
 
 register(
@@ -288,7 +288,7 @@ register(
     # We are copying this over directly from AWX to match their settings
     min_value=60,
     max_value=30000000000,  # approx 1,000 years, higher values give OverflowError
-    label=_('Session Cookie Age'),
+    label=_('Session Cookie Age in Seconds'),
 )
 
 register(
@@ -467,7 +467,7 @@ register(
     preference_type="int_range",
     help_text=_("The interval (in seconds) between Automation Analytics data gathering runs."),
     encrypted=False,
-    label=_('Automation Analytics Gather Interval'),
+    label=_('Automation Analytics Gather Interval in Seconds'),
 )
 
 register(
